@@ -15,10 +15,10 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Scanner;
 
-public class Connection extends Thread {
+public class Connection {
     private static final Logger logger = LoggerFactory.getLogger(Connection.class);
-    private Receiver get = new Receiver();
-    private CollectionManager sender = new CollectionManager();
+    private CollectionManager manager = new CollectionManager();
+    private ServerWork server = new ServerWork(manager.commandMap);
     private Scanner scanner = new Scanner(System.in);
     private Command command;
 
@@ -39,7 +39,6 @@ public class Connection extends Thread {
                     socketChannel.register(selector, SelectionKey.OP_ACCEPT);
                     logger.debug("Сервер запущен");
                     logger.debug("Сервер ожидает подключения");
-                    start();
                     while (selector.isOpen()) {
                         int count = selector.select();
                         if (count == 0) {
@@ -56,14 +55,13 @@ public class Connection extends Thread {
                                     channel.register(selector, SelectionKey.OP_READ);
                                 }
                                 if (key.isReadable()) {
-                                    command = get.receiveCommand(key);
+                                    command = server.receiveCommand(key);
                                 }
                                 if (key.isWritable()) {
-                                    sender.send(key, command);
+                                    server.send(key, command);
                                 }
                                 iter.remove();
                             } catch (Exception e) {
-                                sender.save();
                                 logger.error("Клиент отключился");
                                 key.cancel();
                             }
@@ -80,17 +78,5 @@ public class Connection extends Thread {
                 logger.error("Недопустимый порт");
             }
         }
-    }
-
-    /**
-     * Метод обрабатывет команду stop (доступную только для сервера)
-     */
-    @Override
-    public void run() {
-        String stop = "";
-        while (!(stop.equals("stop"))) {
-            stop = scanner.nextLine();
-        }
-        System.exit(0);
     }
 }

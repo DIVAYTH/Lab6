@@ -8,9 +8,6 @@ import com.google.gson.reflect.TypeToken;
 
 import java.io.*;
 import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.SocketChannel;
 import java.util.*;
 
 import org.slf4j.Logger;
@@ -18,7 +15,7 @@ import org.slf4j.LoggerFactory;
 
 public class CollectionManager {
     public Map<String, AbstractCommand> commandMap;
-    public static CollectionManager server = new CollectionManager();
+    public static CollectionManager manager = new CollectionManager();
     private PriorityQueue<StudyGroup> col = new PriorityQueue<>();
     private Gson gson = new Gson();
     public long id = 0;
@@ -28,92 +25,41 @@ public class CollectionManager {
         return col;
     }
 
-    /**
-     * Метод инициализирует команды
-     */
-    public void putCommand() {
+    {
         commandMap = new HashMap<>();
-        commandMap.put("clear", new Clear(server));
-        commandMap.put("show", new Show(server));
-        commandMap.put("info", new Info(server));
-        commandMap.put("help", new Help(server));
-        commandMap.put("remove_any_by_students_count", new RemoveStudentsCount(server));
-        commandMap.put("print_field_ascending_students_count", new PrintStudentsCount(server));
-        commandMap.put("print_field_descending_form_of_education", new PrintFormOfEducation(server));
-        commandMap.put("remove_by_id", new RemoveId(server));
-        commandMap.put("add", new Add(server));
-        commandMap.put("remove_greater", new RemoveGreater(server));
-        commandMap.put("add_if_min", new AddIfMin(server));
-        commandMap.put("add_if_max", new AddIfMax(server));
-        commandMap.put("update", new Update(server));
-        commandMap.put("execute_script", new ExecuteScript(server));
-        commandMap.put("AddOverloaded", new AddOverloaded(server));
+        commandMap.put("clear", new Clear(manager));
+        commandMap.put("show", new Show(manager));
+        commandMap.put("info", new Info(manager));
+        commandMap.put("help", new Help(manager));
+        commandMap.put("remove_any_by_students_count", new RemoveStudentsCount(manager));
+        commandMap.put("print_field_ascending_students_count", new PrintStudentsCount(manager));
+        commandMap.put("print_field_descending_form_of_education", new PrintFormOfEducation(manager));
+        commandMap.put("remove_by_id", new RemoveId(manager));
+        commandMap.put("add", new Add(manager));
+        commandMap.put("remove_greater", new RemoveGreater(manager));
+        commandMap.put("add_if_min", new AddIfMin(manager));
+        commandMap.put("add_if_max", new AddIfMax(manager));
+        commandMap.put("update", new Update(manager));
+        commandMap.put("execute_script", new ExecuteScript(manager));
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException {
         logger.debug("Запуск сервера");
         Connection connection = new Connection();
         try {
             Runtime.getRuntime().addShutdownHook(new Thread() {
                 public void run() {
                     logger.debug("Отключение сервера");
-                    server.save();
+                    manager.save();
                 }
             });
-            Thread.sleep(1000);
-            server.load(new File(args[0]));
+            manager.load(new File(args[0]));
             connection.connection();
         } catch (ArrayIndexOutOfBoundsException e) {
             logger.error("Вы не ввели имя файла");
         } catch (NoSuchElementException e) {
             //Для ctrl+D
         }
-    }
-
-    /**
-     * Метод отправляет результат выполнения команды на клиент
-     *
-     * @param command
-     * @throws IOException
-     */
-    public void send(SelectionKey key, Command command) throws IOException {
-        SocketChannel channel = (SocketChannel) key.channel();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream toClient = new ObjectOutputStream(baos);
-        putCommand();
-        switch (command.getName()) {
-            case "clear":
-            case "show":
-            case "info":
-            case "help":
-            case "print_field_ascending_students_count":
-            case "print_field_descending_form_of_education": {
-                toClient.writeObject(commandMap.get(command.getName()).execute());
-            }
-            break;
-            case "remove_greater":
-            case "remove_by_id":
-            case "remove_any_by_students_count":
-            case "execute_script": {
-                toClient.writeObject(commandMap.get(command.getName()).execute(command.getArgs()));
-            }
-            break;
-            case "add_if_max":
-            case "add_if_min":
-            case "add": {
-                toClient.writeObject(commandMap.get(command.getName()).execute(command.getStudyGroup()));
-            }
-            break;
-            case "update": {
-                toClient.writeObject(commandMap.get(command.getName()).execute(command.getArgs(), command.getStudyGroup()));
-            }
-            break;
-        }
-        ByteBuffer buffer = ByteBuffer.wrap(baos.toByteArray());
-        channel.write(buffer);
-        baos.close();
-        toClient.close();
-        key.interestOps(SelectionKey.OP_READ);
     }
 
     /**
@@ -139,7 +85,6 @@ public class CollectionManager {
      * @throws IOException
      */
     public void load(File file) throws IOException {
-        putCommand();
         int beginSize = col.size();
         if (!file.exists()) {
             logger.error("Файла по указанному пути не существует.");

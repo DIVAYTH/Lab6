@@ -2,7 +2,6 @@ package proga;
 
 import java.io.*;
 import java.net.ConnectException;
-import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Scanner;
 
@@ -18,8 +17,10 @@ public class Connection {
                 Scanner scanner = new Scanner(System.in);
                 System.out.println("Введите порт");
                 int port = Integer.parseInt(scanner.nextLine());
+                System.out.println("Введите хост");
+                String host = scanner.nextLine();
                 System.out.println("Соединение... Ожидайте");
-                try (Socket socket = new Socket(InetAddress.getLocalHost(), port)) {
+                try (Socket socket = new Socket(host, port)) {
                     System.out.println("Соединение установлено");
                     while (true) {
                         client.work(socket);
