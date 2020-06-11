@@ -3,6 +3,7 @@ package proga;
 import java.io.*;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class Connection {
@@ -21,12 +22,14 @@ public class Connection {
                 String host = scanner.nextLine();
                 System.out.println("Соединение... Ожидайте");
                 try (Socket socket = new Socket(host, port)) {
-                    System.out.println("Соединение установлено");
+                    System.out.println("Соединение установленно введите help, чтобы узнать список команд");
                     while (true) {
                         client.work(socket);
                     }
                 } catch (ConnectException e) {
                     System.out.println("Порт не найден или недоступен");
+                } catch (UnknownHostException e) {
+                    System.out.println("Хост введен неверно");
                 } catch (IllegalArgumentException e) {
                     System.out.println("Порт должен принимать значения от 1 до 65535");
                 } catch (IOException e) {

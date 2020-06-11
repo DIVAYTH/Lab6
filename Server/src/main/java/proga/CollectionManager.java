@@ -40,7 +40,7 @@ public class CollectionManager {
         commandMap.put("add_if_min", new AddIfMin(manager));
         commandMap.put("add_if_max", new AddIfMax(manager));
         commandMap.put("update", new Update(manager));
-        commandMap.put("execute_script", new ExecuteScript(manager));
+        commandMap.put("execute_script", new ExecuteScript(manager, commandMap));
     }
 
     public static void main(String[] args) throws IOException {

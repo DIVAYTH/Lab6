@@ -6,13 +6,16 @@ import proga.CollectionManager;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.Map;
 import java.util.Scanner;
 
 public class ExecuteScript extends AbstractCommand {
-    public ExecuteScript(CollectionManager manager) {
+    public ExecuteScript(CollectionManager manager, Map<String, AbstractCommand> commandMap) {
         super(manager);
+        this.commandMap = commandMap;
     }
 
+    private Map<String, AbstractCommand> commandMap;
     private int stackCount = 0;
 
     /**
@@ -43,7 +46,7 @@ public class ExecuteScript extends AbstractCommand {
                                         userCommand = commandReader.nextLine();
                                         arr[i] = userCommand;
                                     }
-                                    builder.append(manager.commandMap.get(finalUserCommand[0]).execute(execute(arr[0], arr[1], arr[2], arr[3], arr[4]
+                                    builder.append(commandMap.get(finalUserCommand[0]).execute(execute(arr[0], arr[1], arr[2], arr[3], arr[4]
                                             , arr[5], arr[6], arr[7], arr[8], arr[9], arr[10], arr[11], arr[12]))).append("\n");
                                 } catch (NullPointerException e) {
                                     e.printStackTrace();
@@ -59,7 +62,7 @@ public class ExecuteScript extends AbstractCommand {
                             case "info":
                             case "print_field_ascending_students_count":
                             case "print_field_descending_form_of_education":
-                                builder.append(manager.commandMap.get(finalUserCommand[0]).execute()).append("\n");
+                                builder.append(commandMap.get(finalUserCommand[0]).execute()).append("\n");
                                 break;
                             default:
                                 builder.append("Неизвестная команда.").append("\n");
@@ -72,22 +75,22 @@ public class ExecuteScript extends AbstractCommand {
                                     userCommand = commandReader.nextLine();
                                     arr[i] = userCommand;
                                 }
-                                builder.append(manager.commandMap.get(finalUserCommand[0])
+                                builder.append(commandMap.get(finalUserCommand[0])
                                         .execute(finalUserCommand[1], execute(arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6],
                                                 arr[7], arr[8], arr[9], arr[10], arr[11], arr[12]))).append("\n");
                             } else if (finalUserCommand[0].equals("execute_script")) {
                                 stackCount++;
-                                if (stackCount == 2) {
-                                    stackCount = 0;
-                                    builder.append("На вызов execute_script из execute_script наложено ограничение").append("\n");
-                                } else {
+                                if (stackCount == 1) {
                                     execute(finalUserCommand[1]);
+                                    stackCount = 0;
+                                } else {
+                                    break;
                                 }
                             } else switch (finalUserCommand[0]) {
                                 case "remove_greater":
                                 case "remove_by_id":
                                 case "remove_any_by_students_count":
-                                    builder.append(manager.commandMap.get(finalUserCommand[0]).execute(finalUserCommand[1])).append("\n");
+                                    builder.append(commandMap.get(finalUserCommand[0]).execute(finalUserCommand[1])).append("\n");
                                     break;
                                 default:
                                     builder.append("Неизвестная команда или не указан аргумент").append("\n");

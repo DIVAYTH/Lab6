@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class StudyGroup implements Comparable<StudyGroup> , Serializable{
+public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     private static final long serialVersionUID = 42L;
     private long id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     private String name; //Поле не может быть null, Строка не может быть пустой
@@ -26,7 +26,9 @@ public class StudyGroup implements Comparable<StudyGroup> , Serializable{
         this.creationDate = LocalDateTime.now();
     }
 
-    public void setCreationDate() {this.creationDate = LocalDateTime.now();}
+    public void setCreationDate() {
+        this.creationDate = LocalDateTime.now();
+    }
 
     public void setId(long id) {
         this.id = id;
@@ -67,5 +69,6 @@ public class StudyGroup implements Comparable<StudyGroup> , Serializable{
 
     @Override
     public int compareTo(StudyGroup o) {
-        return name.compareTo(o.getName()); }
+        return name.compareTo(o.getName());
+    }
 }

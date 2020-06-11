@@ -31,7 +31,6 @@ public class ServerWork {
         Command command;
         SocketChannel channel = (SocketChannel) key.channel();
         int available = channel.read(buffer);
-        System.out.println(available);
         while (available > 0) {
             available = channel.read(buffer);
         }
