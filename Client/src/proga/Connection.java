@@ -1,9 +1,7 @@
 package proga;
 
 import java.io.*;
-import java.net.ConnectException;
-import java.net.Socket;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.util.Scanner;
 
 public class Connection {
@@ -21,11 +19,15 @@ public class Connection {
                 System.out.println("Введите хост");
                 String host = scanner.nextLine();
                 System.out.println("Соединение... Ожидайте");
-                try (Socket socket = new Socket(host, port)) {
+                SocketAddress socketAddress = new InetSocketAddress(host, port);
+                try (Socket socket = new Socket()) {
+                    socket.connect(socketAddress, 5000);
                     System.out.println("Соединение установленно введите help, чтобы узнать список команд");
                     while (true) {
                         client.work(socket);
                     }
+                }catch (SocketTimeoutException e){
+                    System.out.println("Время подключения вышло. Хост указан неверно или сервер недоступен");
                 } catch (ConnectException e) {
                     System.out.println("Порт не найден или недоступен");
                 } catch (UnknownHostException e) {
